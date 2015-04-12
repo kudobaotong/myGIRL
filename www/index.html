@@ -88,11 +88,10 @@
                     stage.update();
                 }
                 //end of create start spritesheet------------------------------------
-                //starter.alpha = 0;
+                starter.alpha = 1;
                 zim.centerReg(starter);
                 starter.cursor = "pointer";
                 stage.addChild(starter);
-                //zim.animate(starter, {alpha:1}, 4000);
                 starter.on("click", handleclick);
                 //createjs.Sound.play("background");
                 function handleclick() {
