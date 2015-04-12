@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="small avatar app on mobile">
+        <meta name="keywords" content="avatar, mobile, app, interactive">
+        <meta name="author" content="Cynthia Bao">
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, target-densitydpi=device-dpi" />
+        <script>var zon = false;</script>
+        <script src="js/createjs-2014.12.12.min.js"></script>
+        <script src="js/zim_min.js"></script>
+        <script src="js/view.js"></script>
+        <script src="js/controller.js"></script>
+        <script src="js/ontoStage.js"></script>
+        <script src="js/buttons.js"></script>
+        <link href='http://fonts.googleapis.com/css?family=Walter+Turncoat' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>myGIRL</title>
+        <script>
+        // SCALING OPTIONS
+        var scaling = "full"; // full automatically sets width and height to window size
+        var width = null;
+        var height = null;
+        var frame = new zim.Frame(scaling, width, height); 
+        //start to load
+        frame.on("ready", function() {
+            //define the layout stage
+            var stage = frame.stage;
+            var stageW = frame.width;
+            var stageH = frame.height;
+            // handle asset loading and call main app function when complete
+            var contentPath = "content/";
+            //preloading
+            var preload = new createjs.LoadQueue(true, contentPath);
+            preload.installPlugin(createjs.Sound); // for sound preload
+            // array of objects to preload
+            var manifest = [
+            {src:"startspritesheet.png", id:"start"},
+            {src:"refresh1.png", id:"refresh1"},
+            {src:"refresh2.png", id:"refresh2"},
+            {src:"change.png", id:"change"},
+            {src:"gonext.png", id:"gonext"},
+            {src:"goback.png", id:"goback"},
+            {src:"mygirl1ss.png", id:"main1"},
+            {src:"mygirl2ss.png", id:"main2"},
+            {src:"mygirl3ss.png", id:"main3"},
+            {src:"mygirl4ss.png", id:"main4"},
+            {src:"bgm.mp3", id:"background"}
+            ]; 
+            preload.on("complete", avatarApp);   // call the main code when ready   
+            preload.loadManifest(manifest);
+            var waiter = new zim.Waiter(stage, 600, "white", "black", 14);
+            waiter.show();
+            function avatarApp() {
+                waiter.hide();
+                //create start animated spritesheet-----------------------------------
+                var sData;
+                var sSpritesheet;
+                var starter;
+                sinit();
+                function sinit() {
+                    createjs.Ticker.addEventListener("tick", runStarter);
+                    createjs.Ticker.setFPS(5);
+                    spinStarter();
+                }
+                function spinStarter() {
+                    sData = {
+                        "images": [preload.getResult("start")],
+                        "frames": [
+                            [2, 2, 532, 827], 
+                            [536, 2, 532, 827], 
+                            [1070, 2, 532, 827]
+                        ],
+                        "animations": {
+                            "normalAction":[0,1,2]
+                        }
+                    };
+                    sSpritesheet = new createjs.SpriteSheet(sData);
+                    starter = new createjs.Sprite(sSpritesheet,'normalAction');
+                    starter.regY = starter.getBounds().height/2;
+                    starter.regX = starter.getBounds().width/2;
+                    starter.y = 350;
+                    starter.x = 250;
+                }
+                function runStarter(e) {
+                    stage.update();
+                }
+                //end of create start spritesheet------------------------------------
+                stage.addChild(starter);
+                starter.alpha = 0;
+                zim.centerReg(starter);
+                starter.cursor = "pointer";
+                stage.addChild(starter);
+                zim.animate(starter, {alpha:1}, 4000);
+                starter.on("click", handleclick);
+                createjs.Sound.play("background");
+                function handleclick() {
+                    mainapp();
+                };
+                function mainapp() {
+                    //set up the stage variables
+                    stage = frame.stage;
+                    stageW = frame.width;
+                    stageH = frame.height;
+                    //for layouts------------------------------------------------------
+                    var vLayoutManager = new zim.LayoutManager();
+                    var gridManager = new zim.GridManager();
+                    var guideManager = new zim.GuideManager();
+                    var vP = app.makeVerticalPages(vLayoutManager, gridManager, guideManager, stage, stageW, stageH);
+                    //for changing pages (left, right, up, down)------------------------
+                    var vPages = new zim.Pages(stage,[
+                        {page:vP.main, swipe:[vP.info, vP.info, null, null]},//no swipe on vertical
+                        {page:vP.info, swipe:[vP.main, vP.main, null, null]}
+                        ], "slide", 500
+                        );
+                    //for click events-------------------------------------------------
+                    app.makeHotSpots(stage, vP, vPages);
+                    //update environment-----------------------------------------------
+                    stage.update();
+                    //for buttons------------------------------------------------------
+                    var imageRefresh1 = new createjs.Bitmap(preload.getResult("refresh1"));
+                    var imageRefresh2 = new createjs.Bitmap(preload.getResult("refresh2"));
+                    var imageChange = new createjs.Bitmap(preload.getResult("change"));
+                    var imageNext = new createjs.Bitmap(preload.getResult("gonext"));
+                    var imageBack = new createjs.Bitmap(preload.getResult("goback"));
+                    var buttonsOnStage = app.addButtons(imageRefresh1, imageRefresh2, imageChange, imageNext, imageBack, vP, stage);
+                    //main avatar actions--------------------------------------------
+                    //create first avatar----------------------------------------------
+                    var aDataOne;
+                    var aSpritesheetOne;
+                    var avatarOne;
+                    a1init();
+                    function a1init() {
+                        createjs.Ticker.addEventListener("tick", runAvatarOne);
+                        createjs.Ticker.setFPS(5);
+                        spinAvatarOne();
+                    }
+                    function spinAvatarOne() {
+                        aDataOne = {
+                            "images": [preload.getResult("main1")],
+                            "frames": [
+                                [2, 2, 850, 850], 
+                                [854, 2, 850, 850]
+                            ],
+                            "animations": {
+                                "normalAction1":[0,1]
+                            }
+                        };
+                        aSpritesheetOne = new createjs.SpriteSheet(aDataOne);
+                        avatarOne = new createjs.Sprite(aSpritesheetOne,'normalAction1');
+                        avatarOne.regY = avatarOne.getBounds().height/2;
+                        avatarOne.regX = avatarOne.getBounds().width/2;
+                        avatarOne.y = 350;
+                        avatarOne.x = 250;
+                    }
+                    function runAvatarOne(e) {
+                        stage.update();
+                    }
+                    //create second avatar---------------------------------------------
+                    var aDataTwo;
+                    var aSpritesheetTwo;
+                    var avatarTwo;
+                    a2init();
+                    function a2init() {
+                        createjs.Ticker.addEventListener("tick", runAvatarTwo);
+                        createjs.Ticker.setFPS(5);
+                        spinAvatarTwo();
+                    }
+                    function spinAvatarTwo() {
+                        aDataTwo = {
+                            "images": [preload.getResult("main2")],
+                            "frames": [
+                                [2, 2, 850, 850], 
+                                [854, 2, 850, 850]       
+                            ],
+                            "animations": {
+                                "normalAction2":[0,1]
+                            }
+                        };
+                        aSpritesheetTwo = new createjs.SpriteSheet(aDataTwo);
+                        avatarTwo = new createjs.Sprite(aSpritesheetTwo,'normalAction2');
+                        avatarTwo.regY = avatarTwo.getBounds().height/2;
+                        avatarTwo.regX = avatarTwo.getBounds().width/2;
+                        avatarTwo.y = 350;
+                        avatarTwo.x = 250;
+                    }
+                    function runAvatarTwo(e) {
+                        stage.update();
+                    }
+                    //create third avatar---------------------------------------------
+                    var aDataThree;
+                    var aSpritesheetThree;
+                    var avatarThree;
+                    a3init();
+                    function a3init() {
+                        createjs.Ticker.addEventListener("tick", runAvatarThree);
+                        createjs.Ticker.setFPS(5);
+                        spinAvatarThree();
+                    }
+                    function spinAvatarThree() {
+                        aDataThree = {
+                            "images": [preload.getResult("main3")],
+                            "frames": [
+                                [2, 2, 850, 850], 
+                                [854, 2, 850, 850]  
+                            ],
+                            "animations": {
+                                "normalAction3":[0,1]
+                            }
+                        };
+                        aSpritesheetThree = new createjs.SpriteSheet(aDataThree);
+                        avatarThree = new createjs.Sprite(aSpritesheetThree,'normalAction3');
+                        avatarThree.regY = avatarThree.getBounds().height/2;
+                        avatarThree.regX = avatarThree.getBounds().width/2;
+                        avatarThree.y = 350;
+                        avatarThree.x = 250;
+                    }
+                    function runAvatarThree(e) {
+                        stage.update();
+                    }
+                    //create fourth avatar---------------------------------------------
+                    var aDataFour;
+                    var aSpritesheetFour;
+                    var avatarFour;
+                    a4init();
+                    function a4init() {
+                        createjs.Ticker.addEventListener("tick", runAvatarFour);
+                        createjs.Ticker.setFPS(5);
+                        spinAvatarFour();
+                    }
+                    function spinAvatarFour() {
+                        aDataFour = {
+                            "images": [preload.getResult("main4")],
+                            "frames": [
+                                [2, 2, 850, 850], 
+                                [854, 2, 850, 850]
+                            ],
+                            "animations": {
+                                "normalAction4":[0,1]
+                            }
+                        };
+                        aSpritesheetFour = new createjs.SpriteSheet(aDataFour);
+                        avatarFour = new createjs.Sprite(aSpritesheetFour,'normalAction4');
+                        avatarFour.regY = avatarFour.getBounds().height/2;
+                        avatarFour.regX = avatarFour.getBounds().width/2;
+                        avatarFour.y = 350;
+                        avatarFour.x = 250;
+                    }
+                    function runAvatarFour(e) {
+                        stage.update();
+                    }
+                    //add avatar
+                    app.avatarActions(stage, avatarOne, avatarTwo, avatarThree, avatarFour, vP, vPages);
+                    //add info page text
+                    var titleText = "Welcome to \n\n --myGIRL!";
+                    var inforText = "This is a very first\n\nmobile app created by\n\nCynthia Bao.\n\nFor more information\n\nPlease go to her site:\n\nhttp://cynthiabao.com";
+                    app.infoPage(stage, titleText, inforText, vP, vPages);
+                    //dispose grid and layout
+                    gridManager.dispose();
+                    vLayoutManager.dispose();
+                    //update environment-----------------------------------------------
+                    stage.update();
+                    mainOrientation();
+                    function mainOrientation(e) {   
+                        //zog(frame.orientation);
+                        if (frame.orientation == "horizontal") {
+                            stage.addChild(vPages);
+                            vPages.enable();
+                        }else {
+                            stage.addChild(vPages);
+                            //change to horizontal layouts in next version
+                            vPages.enable();
+                        }
+                        stage.update();
+                    }; // end of orientation
+                };//end of mainapp
+                // resizing(scaling="full" only)
+                frame.on("resize", resize);
+                function resize(e) {
+                    stageW = frame.width;
+                    stageH = frame.height;
+                    starter.x = stageW/2;
+                    starter.y = stageH/2;
+                    zim.scaleTo(starter, stage, 50); // 50% the stage width (also see zim.Layout)
+                    stage.update();
+                }
+                resize(); // want to resize after loading
+                // put orientation change code in here
+                frame.on("orientation", function(e) {           
+                    stage.update();
+                });
+                stage.update();
+            }// end of avatarApp
+        }); // end of ready
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
