@@ -46,8 +46,8 @@
             {src:"mygirl1ss.png", id:"main1"},
             {src:"mygirl2ss.png", id:"main2"},
             {src:"mygirl3ss.png", id:"main3"},
-            {src:"mygirl4ss.png", id:"main4"},
-            {src:"bgm.mp3", id:"background"}
+            {src:"mygirl4ss.png", id:"main4"}
+            //{src:"bgm.mp3", id:"background"}
             ]; 
             preload.on("complete", avatarApp);   // call the main code when ready   
             preload.loadManifest(manifest);
@@ -88,14 +88,13 @@
                     stage.update();
                 }
                 //end of create start spritesheet------------------------------------
-                stage.addChild(starter);
                 //starter.alpha = 0;
                 zim.centerReg(starter);
                 starter.cursor = "pointer";
                 stage.addChild(starter);
                 //zim.animate(starter, {alpha:1}, 4000);
                 starter.on("click", handleclick);
-                createjs.Sound.play("background");
+                //createjs.Sound.play("background");
                 function handleclick() {
                     mainapp();
                 };
